@@ -1,2 +1,2 @@
 environment = "test"
-project     = "devops4solutions"
+project     = "terraform-test"

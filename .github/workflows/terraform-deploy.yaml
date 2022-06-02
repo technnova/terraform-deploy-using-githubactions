@@ -1,6 +1,5 @@
 name: "Terraform Deployment"
 on:
-  # Manual trigger
   workflow_dispatch:
   push:
   pull_request:
@@ -8,6 +7,9 @@ on:
 defaults:
   run:
     shell: bash
+
+env:
+  environment: test
     
 permissions:
   id-token: write
@@ -15,21 +17,15 @@ permissions:
   
 jobs:
   terraform:
-    name:   ${{matrix.runner}} - ${{ matrix.environment }}
-    runs-on: [ '${{ matrix.runner }}']
-    strategy:
-      max-parallel: 1
-      matrix:
-         include:
-           - environment: test
-             runner: ubuntu-latest
-
+    name:   "terraform"
+    runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::053342002484:role/github-oidc
-          aws-region: us-east-1
+      # - name: Auth to PACCAR AWS
+      #   uses: PACCAR-Digital/actions-aws-auth@main
+      #   with:
+      #     role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
+      # - run: |
+      #     aws sts get-caller-identity
           
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1
@@ -39,46 +35,42 @@ jobs:
         id: init
         run: |
            rm -rf .terraform
-           terraform init -backend-config=${{ matrix.environment }}/backend.tfvars -upgrade=true -no-color -input=false
+           terraform init -backend-config=${environment}/backend.tfvars -upgrade=true -no-color -input=false
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -input=false -var-file=${{ matrix.environment }}/terraform.tfvars -no-color
+          terraform plan -input=false -var-file=${{environment}}/terraform.tfvars -no-color
         continue-on-error: true
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         id: apply
-        run: terraform apply -auto-approve -input=false -var-file=${{ matrix.environment }}/terraform.tfvars
+        run: terraform apply -auto-approve -input=false -var-file=${{environment}}/terraform.tfvars
       - name: Terraform destroy
         if: github.ref == 'refs/heads/destroy'
         id: destroy
-        run: terraform destroy -auto-approve -input=false -var-file=${{ matrix.environment }}/terraform.tfvars
+        run: terraform destroy -auto-approve -input=false -var-file=${{environment}}/terraform.tfvars
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0 
         if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
-          github-token: ${{ secrets.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-
             <details><summary>Show Plan</summary>
-
             \`\`\`\n
             ${process.env.PLAN}
             \`\`\`
-
             </details>
-
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             })
+            

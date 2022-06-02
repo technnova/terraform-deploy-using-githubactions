@@ -46,6 +46,7 @@ jobs:
         id: plan
         run: |
           terraform plan -input=false -var-file=${{ matrix.environment }}/terraform.tfvars -no-color
+        continue-on-error: true
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         id: apply

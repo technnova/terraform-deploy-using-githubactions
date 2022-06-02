@@ -10,6 +10,11 @@ on:
 defaults:
   run:
     shell: bash
+    
+permissions:
+  id-token: write
+  contents: read # This is required for actions/checkout@v2
+  
 jobs:
   terraform:
     name:   ${{matrix.runner}} - ${{ matrix.environment }}
@@ -20,12 +25,14 @@ jobs:
          include:
            - environment: test
              runner: ubuntu-latest
-    env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-         AWS_DEFAULT_REGION: us-east-1
+
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::053342002484:role/github-oidc
+          aws-region: us-east-1
+          
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1
         with:

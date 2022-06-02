@@ -9,7 +9,7 @@ defaults:
     shell: bash
 
 env:
-  environment: test
+  ENVIRONMENT: test
     
 permissions:
   id-token: write
@@ -35,20 +35,20 @@ jobs:
         id: init
         run: |
            rm -rf .terraform
-           terraform init -backend-config=${environment}/backend.tfvars -upgrade=true -no-color -input=false
+           terraform init -backend-config=${ENVIRONMENT}/backend.tfvars -upgrade=true -no-color -input=false
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -input=false -var-file=${{environment}}/terraform.tfvars -no-color
+          terraform plan -input=false -var-file=${ENVIRONMENT}/terraform.tfvars -no-color
         continue-on-error: true
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         id: apply
-        run: terraform apply -auto-approve -input=false -var-file=${{environment}}/terraform.tfvars
+        run: terraform apply -auto-approve -input=false -var-file=${ENVIRONMENT}/terraform.tfvars
       - name: Terraform destroy
         if: github.ref == 'refs/heads/destroy'
         id: destroy
-        run: terraform destroy -auto-approve -input=false -var-file=${{environment}}/terraform.tfvars
+        run: terraform destroy -auto-approve -input=false -var-file=${ENVIRONMENT}/terraform.tfvars
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0 
         if: github.event_name == 'pull_request'

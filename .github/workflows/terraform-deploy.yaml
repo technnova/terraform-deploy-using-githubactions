@@ -57,16 +57,16 @@ jobs:
         run: terraform destroy -auto-approve -input=false -var-file=${{ matrix.environment }}/terraform.tfvars
   comment:
     runs-on: ubuntu-latest
-    env:
-      STDOUT: |
-        ${{ env.terraform1 }}
-
-        ${{ env.terraform2 }}
     needs: terraform
     if: github.event_name == 'pull_request'
    
-    steps:
+    steps: 
       - uses: actions/github-script@v5
+        env:
+          STDOUT: |
+              ${{ env.terraform1 }}
+
+              ${{ env.terraform2 }}
 
         with:
           script: |

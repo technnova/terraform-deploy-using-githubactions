@@ -20,12 +20,16 @@ jobs:
     name:   "terraform"
     runs-on: ubuntu-latest
     steps:
-      # - name: Auth to PACCAR AWS
-      #   uses: PACCAR-Digital/actions-aws-auth@main
-      #   with:
-      #     role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
-      # - run: |
-      #     aws sts get-caller-identity
+      - name: Auth to PACCAR AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        #uses: PACCAR-Digital/actions-aws-auth@main
+        
+        with:
+          role-to-assume: arn:aws:iam::053342002484:role/github-oidc
+          aws-region: us-east-1
+           #role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
+      #- run: |
+        #   aws sts get-caller-identity
           
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1

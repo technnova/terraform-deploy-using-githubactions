@@ -57,15 +57,22 @@ jobs:
         run: terraform destroy -auto-approve -input=false -var-file=${{ matrix.environment }}/terraform.tfvars
   comment:
     runs-on: ubuntu-latest
+    env:
+      STDOUT: |
+        ${{ env.terraform1 }}
+
+        ${{ env.terraform2 }}
     needs: terraform
     if: github.event_name == 'pull_request'
+   
     steps:
       - uses: actions/github-script@v5
+
         with:
           script: |
-            github.rest.issues.createComment({
+            github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '👋 Thanks for reporting!'
+              body: 'process.env.STDOUT'
             })

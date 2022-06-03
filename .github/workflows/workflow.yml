@@ -1,0 +1,38 @@
+name: "Terraform Deployment"
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Define environment name'     
+        required: true
+        options: 
+        - dev
+        - cert
+        default: 'dev'
+  push:
+  pull_request:
+    branches: [ main ]
+
+defaults:
+  run:
+    shell: bash
+    #working-directory: "${{ github.event.inputs.environment }} "
+
+  
+jobs:
+  terraform:
+    name:   "terraform"
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Greeting 
+         run: |
+          echo  "${{ github.event.inputs.environment }} "
+      # - name: Auth to PACCAR AWS
+      #   uses: PACCAR-Digital/actions-aws-auth@main
+      #   with:
+      #     role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
+      # - run: |
+      #     aws sts get-caller-identity
+          
+     

@@ -1,80 +1,35 @@
-name: "Terraform Deployment"
+name: Formatting python code
 on:
-  workflow_dispatch:
   push:
-  pull_request:
-    branches: [ main ]
-defaults:
-  run:
-    shell: bash
+    paths:
+    - '**.py'
 
-env:
-  ENVIRONMENT: test
-    
-permissions:
-  id-token: write
-  contents: read # This is required for actions/checkout@v2
-  
 jobs:
-  terraform:
-    name:   "terraform"
+  autoyapf:
     runs-on: ubuntu-latest
     steps:
-      - name: Auth to PACCAR AWS
-        uses: aws-actions/configure-aws-credentials@v1
-        #uses: PACCAR-Digital/actions-aws-auth@main
-        
+      - uses: actions/checkout@v1
         with:
-          role-to-assume: arn:aws:iam::053342002484:role/github-oidc
-          aws-region: us-east-1
-           #role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
-      #- run: |
-        #   aws sts get-caller-identity
+          ref: ${{ github.head_ref }}
+      - name: autoyapf
+        id: autoyapf
+        uses: mritunjaysharma394/autoyapf@v2
+        with:
+          args: --style pep257 --recursive --in-place .
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+      - name: Push changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'github-actions' 
+          git config --global user.email 'github-actions@github.com' 
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git commit -am "Automated autoyapf fixes"
           
-      - uses: actions/checkout@v2
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
-      - name: Terraform Init
-        id: init
-        run: |
-           rm -rf .terraform
-           terraform init -backend-config=${ENVIRONMENT}/backend.tfvars -upgrade=true -no-color -input=false
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform plan -input=false -var-file=${ENVIRONMENT}/terraform.tfvars -no-color
-        continue-on-error: true
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        id: apply
-        run: terraform apply -auto-approve -input=false -var-file=${ENVIRONMENT}/terraform.tfvars
-      - name: Terraform destroy
-        if: github.ref == 'refs/heads/destroy'
-        id: destroy
-        run: terraform destroy -auto-approve -input=false -var-file=${ENVIRONMENT}/terraform.tfvars
-      - name: Update Pull Request
-        uses: actions/github-script@v3
-        if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.token }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Show Plan</summary>
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-            </details>
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-            
+
+
+
+
+
+

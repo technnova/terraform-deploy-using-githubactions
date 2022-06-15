@@ -25,14 +25,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-       - name: Greeting 
-         run: |
-          echo  "${{ github.event.inputs.environment }} "
-      # - name: Auth to PACCAR AWS
-      #   uses: PACCAR-Digital/actions-aws-auth@main
+      - name: echo
+        run: echo ${{github.ref_name}}
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v3
       #   with:
-      #     role: "arn:aws:iam::955167096225:role/github-actions-oidc-dummy"
-      # - run: |
-      #     aws sts get-caller-identity
+      #     commit-message: autopep8 action fixes
+      #     title: Fixes by autopep8 action
+      #     body: This is an auto-generated PR with fixes by autopep8.
+      #     labels: autopep8, automated pr
+      #     branch: autopep8-patches
+      
           
      

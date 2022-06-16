@@ -25,8 +25,8 @@ jobs:
           title: Fixes by autopep8 action
           body: This is an auto-generated PR with fixes by autopep8.
           labels: autopep8, automated pr
-          branch: main
-          base: autopep8_patches
+          branch: autopep8_patches
+          #base: autopep8_patches
           
 
 

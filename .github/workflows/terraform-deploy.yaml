@@ -27,7 +27,6 @@ jobs:
           body: "My pull request body"
           branch: "my-pull-request-base-branch"
           commit-message: "My commit message for uncommitted changes in lib/ folder"
-          author: ${{github.actor}}
           labels: label1, label2
           team_reviewers: team1, team2
           update-pull-request-title-and-body: false

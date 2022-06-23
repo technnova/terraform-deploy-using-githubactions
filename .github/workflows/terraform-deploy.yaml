@@ -19,14 +19,28 @@ jobs:
      - name: echo
        run: echo ${{github.ref_name}}
      - name: Create Pull Request
-       uses: peter-evans/create-pull-request@v3
+       uses: devops-infra/action-pull-request@v0.4.2
        with:
-          commit-message: autopep8 action fixes
-          title: Fixes by autopep8 action
-          body: This is an auto-generated PR with fixes by autopep8.
-          labels: autopep8, automated pr
-          branch: autopep8_patches
-          #base: autopep8_patches
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        source_branch: pep8
+        target_branch: master
+        title: My pull request
+        template: .github/PULL_REQUEST_TEMPLATE.md
+        body: "**Automated pull request**"
+        label: enhancement
+        draft: true
+        old_string: "<!-- Add your description here -->"
+        new_string: "** Automatic pull request**"
+        get_diff: true
+        ignore_users: "dependabot"
+#        uses: peter-evans/create-pull-request@v3
+#        with:
+#           commit-message: autopep8 action fixes
+#           title: Fixes by autopep8 action
+#           body: This is an auto-generated PR with fixes by autopep8.
+#           labels: autopep8, automated pr
+#           branch: autopep8_patches
+#           #base: autopep8_patches
           
 
 

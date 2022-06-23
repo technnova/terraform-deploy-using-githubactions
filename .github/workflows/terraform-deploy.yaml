@@ -19,20 +19,18 @@ jobs:
      - name: echo
        run: echo ${{github.ref_name}}
      - name: Create Pull Request
-       uses: devops-infra/action-pull-request@v0.4.2
+       uses: gr2m/create-or-update-pull-request-action@v1
+       env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        source_branch: pep8
-        target_branch: master
-        title: My pull request
-        template: .github/PULL_REQUEST_TEMPLATE.md
-        body: "**Automated pull request**"
-        label: enhancement
-        draft: true
-        old_string: "<!-- Add your description here -->"
-        new_string: "** Automatic pull request**"
-        get_diff: true
-        ignore_users: "dependabot"
+          title: "My pull request title"
+          body: "My pull request body"
+          branch: "my-pull-request-base-branch"
+          commit-message: "My commit message for uncommitted changes in lib/ folder"
+          author: ${{github.actor}}
+          labels: label1, label2
+          team_reviewers: team1, team2
+          update-pull-request-title-and-body: false
 #        uses: peter-evans/create-pull-request@v3
 #        with:
 #           commit-message: autopep8 action fixes

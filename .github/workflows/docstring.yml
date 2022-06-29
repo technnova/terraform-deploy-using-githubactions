@@ -1,6 +1,8 @@
 name: Python preformatter pep-257
 
-on: [workflow_dispatch, push]
+on: 
+  workflow_dispatch:
+  push:
 
 jobs:
   create-virtualenv:

@@ -2,7 +2,7 @@ name: "Dags Deployment"
 on:
   workflow_dispatch:
   push: 
-    branches: [main,dags]
+    branches: [main, dags]
   pull_request:
     branches: [ main ]
 defaults:
@@ -10,10 +10,7 @@ defaults:
     shell: bash
 
 env:
-  ENVIRONMENT: test
-  S3_BUCKET_DEV: mwaa-dev-poc
-  S3_BUCKET_CERT: mwaa-cert-poc
-  S3_BUCKET_PROD: mwaa-prod-poc
+  S3_BUCKET:  data-engineering-airflow
   DAGS_PATH: dags/
 
     
@@ -25,7 +22,7 @@ jobs:
   main:
     strategy:
       matrix:
-        environment: [dev]
+        environment: [dev, cert, prod]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -44,9 +41,7 @@ jobs:
         working-directory:  "${{matrix.environment}}"
 
       - name: upload Dags to S3
-        env:
-         BUCKET: ${{ env.S3_BUCKET_${matrix.environment^^} }}
         id: s3_upload
         if: steps.git_check.outputs.modified == 'true'    
-        run: aws s3 cp . s3://$BUCKET/${{env.DAGS_PATH}}/
+        run: aws s3 cp . "s3://${{env.S3_BUCKET}}-${{matrix.environment}}/${{env.DAGS_PATH}}/"
         working-directory:  "${{matrix.environment}}"

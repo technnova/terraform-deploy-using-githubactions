@@ -1,7 +1,8 @@
 name: "Dags Deployment"
 on:
   workflow_dispatch:
-  push:
+  push: 
+    branches: main
   pull_request:
     branches: [ main ]
 defaults:

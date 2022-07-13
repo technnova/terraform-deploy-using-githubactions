@@ -43,5 +43,5 @@ jobs:
       - name: upload Dags to S3
         id: s3_upload
         if: steps.git_check.outputs.modified == 'true'    
-        run: aws s3 cp . "s3://${{env.S3_BUCKET}}-${{matrix.environment}}/${{env.DAGS_PATH}}/"
+        run: aws s3 sync . "s3://${{env.S3_BUCKET}}-${{matrix.environment}}/${{env.DAGS_PATH}}"
         working-directory:  "${{matrix.environment}}"

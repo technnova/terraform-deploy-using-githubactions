@@ -37,7 +37,7 @@ jobs:
 
       - name: Check for modified files
         id: git_check
-        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+        run: echo ::set-output name=modified::$(if git diff --stat HEAD -- .; then echo "true"; else echo "false";fi)
         working-directory:  "${{matrix.environment}}"
 
       - name: upload Dags to S3

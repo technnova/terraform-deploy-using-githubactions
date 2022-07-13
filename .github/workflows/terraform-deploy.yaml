@@ -2,7 +2,7 @@ name: "Dags Deployment"
 on:
   workflow_dispatch:
   push: 
-    branches: main
+    branches: [main,dags]
   pull_request:
     branches: [ main ]
 defaults:
@@ -11,16 +11,25 @@ defaults:
 
 env:
   ENVIRONMENT: test
+  S3_BUCKET_DEV: mwaa-dev-poc
+  S3_BUCKET_CERT: mwaa-cert-poc
+  S3_BUCKET_PROD: mwaa-prod-poc
+  DAGS_PATH: dags/
+
     
 permissions:
   id-token: write
   contents: read # This is required for actions/checkout@v2
   
 jobs:
-  terraform:
-    name:   "terraform"
+  main:
+    strategy:
+      matrix:
+        environment: [dev]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+
       - name: Auth to PACCAR AWS
         uses: aws-actions/configure-aws-credentials@v1
         
@@ -29,7 +38,15 @@ jobs:
           aws-region: us-east-1
  
 
-      - uses: actions/checkout@v2
       - name: Check for modified files
-        id: git-check
+        id: git_check
         run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+        working-directory:  "${{matrix.environment}}"
+
+      - name: upload Dags to S3
+        env:
+         BUCKET: ${{ env.S3_BUCKET_${matrix.environment^^} }}
+        id: s3_upload
+        if: steps.git_check.outputs.modified == 'true'    
+        run: aws s3 cp . s3://$BUCKET/${{env.DAGS_PATH}}/
+        working-directory:  "${{matrix.environment}}"

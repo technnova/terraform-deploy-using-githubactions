@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: technnova/mwaa-dags@master
+    - uses: devops-technovation/mwaa-dags@main
 #     - name: Auth to  AWS
-#       uses:technnova/actions-aws-auth@main
+#       uses: devops-technovation/actions-aws-auth@main
 #       with:
 #         role: "${{steps.validate_changes.outputs.role_name}}"
 #     - run: aws sts get-caller-identity

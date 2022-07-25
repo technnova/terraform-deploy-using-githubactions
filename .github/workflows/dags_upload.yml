@@ -1,0 +1,30 @@
+name: "Dags Deployment"
+on:
+  push:
+  workflow_dispatch:
+    
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: technnova/mwaa-dags@master
+#     - name: Auth to  AWS
+#       uses:technnova/actions-aws-auth@main
+#       with:
+#         role: "${{steps.validate_changes.outputs.role_name}}"
+#     - run: aws sts get-caller-identity
+    
+    - name: upload Dags to S3
+      run: |
+        if [[ "${{ steps.validate_changes.outputs.modified }}" == "true" ]]; then
+          echo "role_name:  ${{steps.validate_changes.outputs.role_name}}"
+          echo "aws s3 cp $file s3://${{ steps.validate_changes.outputs.bucket_url }}/dag/"
+        fi
+    
+
+
+
+
+
+
